@@ -3,10 +3,12 @@ package com.example.easynote.easynote.controller;
 import com.example.easynote.easynote.exception.ResourceNotFoundException;
 import com.example.easynote.easynote.model.Note;
 import com.example.easynote.easynote.repository.NoteRepository;
+import com.example.easynote.easynote.service.WebSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.socket.WebSocketHandler;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -14,8 +16,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class NoteController {
+
+    @Autowired
+    private WebSessionService webSessionService;
+
     @Autowired
     private NoteRepository noteRepository;
+
     // Get All Notes
     @GetMapping("/notes")
     public List<Note> getAllNotes() {
@@ -25,6 +32,7 @@ public class NoteController {
     // Create a new Note
     @PostMapping("/notes")
     public Note createNote(@Valid @RequestBody Note note) {
+        webSessionService.broadCast("note added");
         return noteRepository.save(note);
     }
 
