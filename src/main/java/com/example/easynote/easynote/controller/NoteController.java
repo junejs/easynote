@@ -5,6 +5,7 @@ import com.example.easynote.easynote.model.Note;
 import com.example.easynote.easynote.repository.NoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,9 @@ import java.util.List;
 public class NoteController {
     @Autowired
     private NoteRepository noteRepository;
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
+
     // Get All Notes
     @GetMapping("/notes")
     public List<Note> getAllNotes() {
@@ -25,7 +29,9 @@ public class NoteController {
     // Create a new Note
     @PostMapping("/notes")
     public Note createNote(@Valid @RequestBody Note note) {
-        return noteRepository.save(note);
+        note = noteRepository.save(note);
+        simpMessagingTemplate.convertAndSend("/topic/note","note created."+note.getTitle());
+        return note;
     }
 
     // Get a Single Note
